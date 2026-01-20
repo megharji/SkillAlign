@@ -11,7 +11,8 @@ from app.common.token_utils import create_access_token
 
 
 auth_routers = APIRouter()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+
 
 
 def get_db():
@@ -28,7 +29,7 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     hashed_password = pwd_context.hash(user.password)
-    new_user = User(username=user.username, email=user.email, password_hash=hashed_password)
+    new_user = User(username=user.username, email=user.email, password_hash=hashed_password, role=user.role)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -41,7 +42,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     if not db_user or not pwd_context.verify(user.password, db_user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    token_data = {"user_id": db_user.id}
+    token_data = {"user_id": db_user.id, "role":db_user.role}
     access_token = create_access_token(token_data)
 
     return {"access_token": access_token, "token_type": "bearer"}
