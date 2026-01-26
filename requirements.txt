@@ -13,3 +13,6 @@ scikit-learn
 requests
 PyPDF2
 python-docx
+transformers
+torch
+accelerate

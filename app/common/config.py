@@ -19,6 +19,10 @@ load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+# === HUGGING FACE CONFIG ===
+HF_TOKEN = os.getenv("HF_TOKEN")
+HF_TEXT_MODEL = os.getenv("HF_TEXT_MODEL", "gpt2")  # Default to GPT-2, can be changed to any HF model
+
 
 # === DATABASE CONFIG ===
 DATABASE_URL = os.getenv("DATABASE_URL")
