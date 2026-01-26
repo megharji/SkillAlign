@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.routes.auth_routers import auth_routers
 from app.routes.hr_routers import hr_routers
+from app.routes.seeker_router import seeker_router
 from app.common.config import Base, engine
 from app.models import * 
 
@@ -12,6 +13,7 @@ app = FastAPI(title="SkillAlign")
 # Include routers for different modules
 app.include_router(auth_routers, prefix="/auth_routers", tags=["Auth Routers"])
 app.include_router(hr_routers, prefix="/hr_routers", tags=["HR Routers"])
+app.include_router(seeker_router, prefix="/seeker_router", tags=["Seeker Routers"])
 
 
 

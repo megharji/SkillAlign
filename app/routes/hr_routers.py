@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Form, UploadFile, File, Depends
+from fastapi import APIRouter, Form, UploadFile, File, Depends,HTTPException
 from typing import List
 import logging
 
@@ -19,6 +19,11 @@ async def match_resumes(
     print("Current User:", current_user)
     results = []
 
+    if current_user.get("role") != "HR":
+        raise HTTPException(
+            status_code=403,
+            detail="Only HR can use this endpoint"
+    )
     for resume in resumes:
         resume_text = await extract_resume_text(resume)
         raw_score = calculate_ats_score(resume_text, jd_text)
