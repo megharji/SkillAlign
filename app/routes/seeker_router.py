@@ -28,7 +28,7 @@ async def compare_resume_jd(
         resume_text = await extract_resume_text(resume_file)
 
 
-    except Exception as e:5
+    except Exception as e:
         raise HTTPException(status_code=400, detail=f"Resume extraction failed: {str(e)}")
 
     if not resume_text.strip():
