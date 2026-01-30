@@ -16,3 +16,6 @@ python-docx
 transformers
 torch
 accelerate
+python-multipart
+PyJWT
+psycopg2-binary

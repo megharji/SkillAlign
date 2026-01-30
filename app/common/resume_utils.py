@@ -34,12 +34,18 @@ async def extract_resume_text(file):
         return ""
 
 def get_match_level(score: float) -> str:
-    if score >= 0.8:
+    if score >= 8:
         return "Excellent Match"
-    elif score >= 0.6:
+    elif score >= 6:
         return "Good Match"
-    elif score >= 0.4:
+    elif score >= 4:
         return "Average Match"
     else:
         return "Poor Match"
 
+def get_color_code(score: float):
+    if score >= 8:
+        return "GREEN"
+    elif score >= 5:
+        return "YELLOW"
+    return "RED"

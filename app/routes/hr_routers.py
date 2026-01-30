@@ -3,7 +3,7 @@ from typing import List
 import logging
 
 from app.common.token_utils import get_current_user
-from app.common.resume_utils import extract_resume_text, get_match_level,calculate_ats_score
+from app.common.resume_utils import extract_resume_text,get_color_code, get_match_level,calculate_ats_score
 
 logger = logging.getLogger(__name__)
 
@@ -16,32 +16,46 @@ async def match_resumes(
     resumes: List[UploadFile] = File(...),
     current_user: dict = Depends(get_current_user)
 ):
-    print("Current User:", current_user)
+    if current_user.get("role") != "HR":
+        raise HTTPException(status_code=403, detail="Only HR can use this endpoint")
+
     results = []
 
-    if current_user.get("role") != "HR":
-        raise HTTPException(
-            status_code=403,
-            detail="Only HR can use this endpoint"
-    )
     for resume in resumes:
         resume_text = await extract_resume_text(resume)
-        raw_score = calculate_ats_score(resume_text, jd_text)
-
-        match_level = get_match_level(raw_score)
+        raw_score = calculate_ats_score(resume_text, jd_text)  # 0–1
+        score = round(raw_score * 10, 1)  # 0–10
 
         results.append({
             "file_name": resume.filename,
-            "score": round(raw_score * 10, 1),
-            "match_level": match_level
+            "score": score,
+            "match_level": get_match_level(score),
+            "color_code": get_color_code(score)
         })
+
+    # Rank High → Low
+    results.sort(key=lambda x: x["score"], reverse=True)
+
+    # Categorize
+    strong_matches = [r for r in results if r["score"] >= 7]
+    potential_matches = [r for r in results if 4 <= r["score"] < 7]
+    rejected = [r for r in results if r["score"] < 4]
+
+    # Shortlisted fallback logic
+    shortlisted = strong_matches[:10]
+    
+
+    # Remaining candidates
+    others = [r for r in potential_matches if r not in shortlisted] + rejected
 
     return {
         "user_id": current_user.get("user_id"),
-        "total_resumes": len(resumes),
-        "results": results
+        "total_resumes": len(results),
+        "summary": {
+            "strong_matches": len(strong_matches),
+            "potential_matches": len(potential_matches),
+            "rejected": len(rejected)
+        },
+        "shortlisted": shortlisted,
+        "others": others
     }
-    
-    
-    
-    
