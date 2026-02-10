@@ -28,6 +28,7 @@ def extract_json(text: str):
         return json.loads(match.group())
 
 
+
 @seeker_router.post("/compare-resume-jd")
 async def compare_resume_jd(
     resume_file: UploadFile = File(...),
@@ -42,42 +43,32 @@ async def compare_resume_jd(
 ):
     # ---- AUTH ----
     if current_user.get("role") != "Seeker":
-        raise HTTPException(403, "Only Seekers can use this endpoint")
+        raise HTTPException(status_code=403, detail="Only Seekers can use this endpoint")
 
     # ---- RESUME TEXT ----
     try:
         resume_text = await extract_resume_text(resume_file)
     except Exception as e:
-        raise HTTPException(400, f"Resume extraction failed: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Resume extraction failed: {str(e)}")
 
     if not resume_text.strip():
-        raise HTTPException(400, "Empty resume text")
+        raise HTTPException(status_code=400, detail="Empty resume text")
 
-    # ---- COLLECT JDs ----
-    jd_list = [jd_1, jd_2, jd_3, jd_4, jd_5]
-    jd_list = [jd.strip() for jd in jd_list if jd and jd.strip()]
+    # ---- VALIDATE + COLLECT JDs (keep original jd_number 1..5) ----
+    jd_inputs = [jd_1, jd_2, jd_3, jd_4, jd_5]
 
-    if not jd_list:
-        raise HTTPException(400, "At least one JD is required")
+    valid_jds = []
+    for idx, jd in enumerate(jd_inputs, start=1):
+        if jd and jd.strip() and jd.strip().lower() != "string":
+            valid_jds.append((idx, jd.strip()))
+
+    if not valid_jds:
+        raise HTTPException(status_code=400, detail="At least one JD is required")
 
     results = []
 
-    # ---- LOOP OVER JDs ----
-    jd_inputs = [jd_1, jd_2, jd_3, jd_4, jd_5]
-
-    for idx, jd in enumerate(jd_inputs, start=1):
-        if not jd or not jd.strip() or jd.strip().lower() == "string":
-            results.append({
-                "jd_number": idx,
-                "analysis": {
-                    "missing_skills": [],
-                    "matched_skills": [],
-                    "improvement_suggestions": [],
-                    "suitability_percentage": 0
-                }
-            })
-            continue
-
+    # ---- LOOP OVER ONLY FILLED JDs ----
+    for idx, jd in valid_jds:
         prompt = f"""
 You are an ATS-grade resume evaluator.
 
@@ -116,29 +107,22 @@ JOB DESCRIPTION:
             "response_format": {"type": "json_object"}
         }
 
-        response = requests.post(HF_URL, headers=headers, json=payload, timeout=60)
-        if response.status_code != 200:
-            results.append({
-                "jd_number": idx,
-                "analysis": {
-                    "missing_skills": [],
-                    "matched_skills": [],
-                    "improvement_suggestions": [],
-                    "suitability_percentage": 0
-                }
-            })
-            continue
+        parsed = {
+            "missing_skills": [],
+            "matched_skills": [],
+            "improvement_suggestions": [],
+            "suitability_percentage": 0
+        }
 
         try:
-            ai_content = response.json()["choices"][0]["message"]["content"]
-            parsed = extract_json(ai_content)
+            response = requests.post(HF_URL, headers=headers, json=payload, timeout=60)
+
+            if response.status_code == 200:
+                ai_content = response.json()["choices"][0]["message"]["content"]
+                parsed = extract_json(ai_content)
         except Exception:
-                parsed = {
-                "missing_skills": [],
-                "matched_skills": [],
-                "improvement_suggestions": [],
-                "suitability_percentage": 0
-            }
+            # keep default parsed (zeros) on any failure
+            pass
 
         results.append({
             "jd_number": idx,
@@ -146,7 +130,7 @@ JOB DESCRIPTION:
         })
 
     if not results:
-        raise HTTPException(500, "AI failed for all JDs")
+        raise HTTPException(status_code=500, detail="AI failed for all JDs")
 
     # ---- BEST MATCH ----
     best_match = max(
@@ -157,7 +141,7 @@ JOB DESCRIPTION:
     # ---- RESPONSE ----
     return {
         "status": "success",
-        "total_jds_compared": len(results),
+        "total_jds_compared": len(valid_jds),  # ✅ now correct
         "best_matching_jd": best_match,
-        "all_jd_results": results
+        "all_jd_results": results  # ✅ only filled JDs
     }

@@ -37,15 +37,14 @@ def get_match_level(score: float) -> str:
     if score >= 8:
         return "Excellent Match"
     elif score >= 6:
-        return "Good Match"
-    elif score >= 4:
-        return "Average Match"
+        return "Potential Match"
     else:
-        return "Poor Match"
+        return "Rejected"
+
 
 def get_color_code(score: float):
     if score >= 8:
         return "GREEN"
-    elif score >= 5:
+    elif score >= 6:
         return "YELLOW"
     return "RED"

@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 hr_routers = APIRouter()
 
 
-@hr_routers.post("/match-resumes")
-async def match_resumes(
+@hr_routers.post("/score-resumes")
+async def score_resumes(
     jd_text: str = Form(...),
     resumes: List[UploadFile] = File(...),
     current_user: dict = Depends(get_current_user)
@@ -33,20 +33,19 @@ async def match_resumes(
             "color_code": get_color_code(score)
         })
 
-    # Rank High → Low
+   
     results.sort(key=lambda x: x["score"], reverse=True)
 
-    # Categorize
-    strong_matches = [r for r in results if r["score"] >= 7]
-    potential_matches = [r for r in results if 4 <= r["score"] < 7]
-    rejected = [r for r in results if r["score"] < 4]
+    strong_matches = [r for r in results if r["score"] >= 8]
+    potential_matches = [r for r in results if 6 <= r["score"] < 8]
+    rejected = [r for r in results if r["score"] < 6]
 
-    # Shortlisted fallback logic
-    shortlisted = strong_matches[:10]
-    
+    # shortlist: first take all strong, then fill from potential (max 10)
+    shortlisted = (strong_matches + potential_matches)[:10]
 
-    # Remaining candidates
-    others = [r for r in potential_matches if r not in shortlisted] + rejected
+    # others: remaining potential + rejected (exclude shortlisted)
+    shortlisted_set = {(r["file_name"], r["score"]) for r in shortlisted}
+    others = [r for r in (potential_matches + rejected) if (r["file_name"], r["score"]) not in shortlisted_set]
 
     return {
         "user_id": current_user.get("user_id"),
@@ -54,8 +53,8 @@ async def match_resumes(
         "summary": {
             "strong_matches": len(strong_matches),
             "potential_matches": len(potential_matches),
-            "rejected": len(rejected)
+            "rejected": len(rejected),
         },
         "shortlisted": shortlisted,
-        "others": others
+        "others": others,
     }
