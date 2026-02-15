@@ -6,11 +6,14 @@ from app.routes.hr_routers import hr_routers
 from app.routes.seeker_router import seeker_router
 from app.common.config import Base, engine
 from app.models import *
+app = FastAPI(title="SkillAlign")
 
 # ✅ Create all tables
-Base.metadata.create_all(bind=engine)
+app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="SkillAlign")
+
 
 # ✅ CORS (Vite frontend: http://localhost:5173)
 origins = [
