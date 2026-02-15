@@ -36,4 +36,4 @@ app.include_router(seeker_router, prefix="/seeker_router", tags=["Seeker Routers
 
 @app.get("/")
 def home():
-    return {"message": "Hello, World!"}
+    return {"ok": True}

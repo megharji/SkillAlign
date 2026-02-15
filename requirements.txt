@@ -20,3 +20,4 @@ python-multipart
 PyJWT
 psycopg2-binary
 argon2-cffi
+gunicorn
