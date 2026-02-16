@@ -1,5 +1,5 @@
 from sklearn.metrics.pairwise import cosine_similarity
-from app.common.embedding import model
+from app.common.embedding import get_model
 import io
 from PyPDF2 import PdfReader
 from docx import Document
@@ -7,7 +7,7 @@ from docx import Document
 def calculate_ats_score(resume_text: str, jd_text: str) -> float:
     if not resume_text or not jd_text:
         return 0.0
-
+    model = get_model()
     jd_vec = model.encode([jd_text])
     resume_vec = model.encode([resume_text])
 

@@ -5,19 +5,19 @@ alembic
 python-dotenv
 pydantic
 pydantic[email]
-python-dotenv
 passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.3.0
-sentence-transformers
-scikit-learn
 requests
 PyPDF2
 python-docx
-transformers
-torch
-accelerate
 python-multipart
 PyJWT
 psycopg2-binary
 argon2-cffi
 
+# AI libs - keep commented in web service for now
+# sentence-transformers
+# transformers
+# torch
+# accelerate
+# scikit-learn
