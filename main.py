@@ -13,6 +13,13 @@ app = FastAPI(title="SkillAlign")
 # def on_startup():
 #     Base.metadata.create_all(bind=engine)
 
+@app.on_event("startup")
+def test_db():
+    try:
+        with engine.connect() as conn:
+            print("✅ DB CONNECTED SUCCESSFULLY")
+    except Exception as e:
+        print("❌ DB ERROR:", e)
 
 
 # ✅ CORS (Vite frontend: http://localhost:5173)
