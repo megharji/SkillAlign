@@ -9,9 +9,9 @@ from app.models import *
 app = FastAPI(title="SkillAlign")
 
 # ✅ Create all tables
-@app.on_event("startup")
-def on_startup():
-    Base.metadata.create_all(bind=engine)
+# @app.on_event("startup")
+# def on_startup():
+#     Base.metadata.create_all(bind=engine)
 
 
 
