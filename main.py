@@ -25,7 +25,8 @@ def test_db():
 # ✅ CORS (Vite frontend: http://localhost:5173)
 origins = [
     "https://skillalignfrontend.onrender.com",
-    "http://localhost:5174",
+    "http://localhost:5173",
+    "http://localhost:5174"
 ]
 
 app.add_middleware(
