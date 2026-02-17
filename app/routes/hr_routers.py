@@ -23,8 +23,8 @@ async def score_resumes(
 
     for resume in resumes:
         resume_text = await extract_resume_text(resume)
-        raw_score = calculate_ats_score(resume_text, jd_text)  # 0–1
-        score = round(raw_score * 10, 1)  # 0–10
+        raw_score = calculate_ats_score(resume_text, jd_text) 
+        score = raw_score  
 
         results.append({
             "file_name": resume.filename,
