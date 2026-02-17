@@ -24,7 +24,7 @@ def test_db():
 
 # ✅ CORS (Vite frontend: http://localhost:5173)
 origins = [
-    "http://localhost:5173",
+    "https://skillalignfrontend.onrender.com",
     "http://localhost:5174",
 ]
 
