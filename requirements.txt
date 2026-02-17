@@ -14,10 +14,3 @@ python-multipart
 PyJWT
 psycopg2-binary
 argon2-cffi
-
-# AI libs - keep commented in web service for now
-# sentence-transformers
-# transformers
-# torch
-# accelerate
-# scikit-learn
