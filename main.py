@@ -8,16 +8,16 @@ from app.common.config import Base, engine
 from app.models import *
 app = FastAPI(title="SkillAlign")
 
-# ✅ Create all tables
-# @app.on_event("startup")
-# def on_startup():
-#     Base.metadata.create_all(bind=engine)
 
 @app.on_event("startup")
 def test_db():
     try:
         with engine.connect() as conn:
             print("✅ DB CONNECTED SUCCESSFULLY")
+
+        Base.metadata.create_all(bind=engine)
+        print("✅ TABLES CREATED SUCCESSFULLY")
+
     except Exception as e:
         print("❌ DB ERROR:", e)
 
